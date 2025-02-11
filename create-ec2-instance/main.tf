@@ -19,6 +19,12 @@ resource "aws_instance" "app_instance" {
   # that we want a public IP
   associate_public_ip_address = true
 
+  # Attach the security group defined to the default VPC
+  vpc_security_group_ids = [aws_security_group.public.id]
+
+  # Specify the SSH key to access the instance
+  key_name = "tech501-farah-aws-key"
+
   # name the service/instance on AWS
   tags = {
     Name = "tech501-farah-terraform-app"
