@@ -1,32 +1,32 @@
 # create an ec2 instance
 
-# where to create it - provide cloud name
+# where to create the EC2 instance - provide cloud provider's name
 
 provider "aws" {
-  # which region to use (where to create these resources)
-  region = "eu-west-1"
+  # which region to use (where to create these resources) -- the below is the same as Ireland
+  region = var.region
 }
 
 # which services/resources with app_instance being my local reference to the resource
 resource "aws_instance" "app_instance" {
 
   # what AMI (amazon machine image) ID to use
-  ami = "ami-0c1c30571d2dae5c9"
+  ami = var.ami_id
 
-  # which type of instance
-  instance_type = "t3.micro"
+  # which type of instance, which specifies CPU cores, memory size, and storage capacity
+  instance_type = var.instance_type
 
   # that we want a public IP
-  associate_public_ip_address = true
+  associate_public_ip_address = var.public_ip_setting
 
-  # Attach the security group defined to the default VPC
+  # attaching the security group defined in security_groups file to the default VPC we have been using
   vpc_security_group_ids = [aws_security_group.public.id]
 
-  # Specify the SSH key to access the instance
-  key_name = "tech501-farah-aws-key"
+  # specifying the SSH key to access the instance; this is already set up on AWS
+  key_name = var.SSH_key_name
 
-  # name the service/instance on AWS
+  # naming the service/instance on AWS via tags
   tags = {
-    Name = "tech501-farah-terraform-app"
+    Name = var.instance_name
   }
 }
