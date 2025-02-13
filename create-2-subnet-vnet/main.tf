@@ -11,7 +11,7 @@ data "azurerm_resource_group" "tech501" {
 
 # Virtual Network
 resource "azurerm_virtual_network" "my_vnet" {
-  name                = "tech501-farah-terraform-2-subnet-vnet"
+  name                = var.vnet_name
   address_space       = ["10.0.0.0/16"]
   location            = data.azurerm_resource_group.tech501.location
   resource_group_name = data.azurerm_resource_group.tech501.name
@@ -47,7 +47,7 @@ resource "azurerm_network_security_group" "tf_private_nsg" {
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
-    destination_port_range     = "22" # SSH
+    destination_port_range     = "22"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
@@ -236,11 +236,11 @@ resource "azurerm_network_security_group" "tf_public_nsg" {
 # NSG association
 resource "azurerm_subnet_network_security_group_association" "public_subnet_association" {
   subnet_id                 = azurerm_subnet.my_public_subnet.id
-  network_security_group_id = azurerm_network_security_group.tf_public_nsg.id # Corrected this line
+  network_security_group_id = azurerm_network_security_group.tf_public_nsg.id
 }
 
 # NSG association
 resource "azurerm_subnet_network_security_group_association" "private_subnet_association" {
   subnet_id                 = azurerm_subnet.my_private_subnet.id
-  network_security_group_id = azurerm_network_security_group.tf_private_nsg.id # Corrected this line as well
+  network_security_group_id = azurerm_network_security_group.tf_private_nsg.id
 }

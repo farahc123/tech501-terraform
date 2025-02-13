@@ -4,30 +4,31 @@ provider "azurerm" {
   subscription_id = var.subscription_id
 }
 
-# Referencing my pre-existing SSH public key in Azure
+# Referencing my SSH public key, already added in Azure
 data "azurerm_ssh_public_key" "tech501-farah-az-key" {
-  name                = "tech501-farah-az-key"
-  resource_group_name = "tech501"
+  name                = var.azurerm_ssh_public_key
+  resource_group_name = var.resource_group_name
 }
 
-# Referencing my existing private subnet
+# Referencing my already existing private subnet
 data "azurerm_subnet" "private_subnet" {
   name                 = "private-subnet"
-  resource_group_name  = "tech501"
-  virtual_network_name = "tech501-farah-2-subnet-vnet"
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = var.vnet_name
 }
 
 # Referencing my DB image
 data "azurerm_image" "tech501_farah_db_image" {
-  name                = "tech501-farah-sparta-app-db-vm-image-20250129124146"
-  resource_group_name = "tech501"
+  name                = var.azurerm_image
+  resource_group_name = var.resource_group_name
 }
 
 resource "azurerm_network_interface" "tech501-farah-tf-db-vm-NIC" {
   name                = "tech501-farah-tf-db-vm-NIC"
-  location            = "UK South"
-  resource_group_name = "tech501"
+  location            = var.location
+  resource_group_name = var.resource_group_name
 
+  # No public IP provided below
   ip_configuration {
     name                          = "internal"
     subnet_id                     = data.azurerm_subnet.private_subnet.id
@@ -35,12 +36,15 @@ resource "azurerm_network_interface" "tech501-farah-tf-db-vm-NIC" {
   }
 }
 
+# Settings for the machine itself
 resource "azurerm_virtual_machine" "tech501-farah-tf-db-vm" {
-  name                  = "tech501-farah-tf-db-vm"
-  location              = "UK South"
-  resource_group_name   = "tech501"
-  network_interface_ids = [azurerm_network_interface.tech501-farah-tf-db-vm-NIC.id]
-  vm_size               = "Standard_B1s"
+  name                             = var.db_VM_name
+  location                         = var.location
+  resource_group_name              = var.resource_group_name
+  network_interface_ids            = [azurerm_network_interface.tech501-farah-tf-db-vm-NIC.id]
+  vm_size                          = "Standard_B1s"
+  delete_data_disks_on_termination = true
+  delete_os_disk_on_termination    = true
   storage_os_disk {
     name          = "farah-db-tf-os-disk"
     caching       = "ReadWrite"
@@ -49,8 +53,8 @@ resource "azurerm_virtual_machine" "tech501-farah-tf-db-vm" {
   }
 
   os_profile {
-    computer_name  = "tech501-farah-tf-db-vm"
-    admin_username = "adminuser"
+    computer_name  = var.db_VM_name
+    admin_username = var.admin_username
   }
 
   os_profile_linux_config {
